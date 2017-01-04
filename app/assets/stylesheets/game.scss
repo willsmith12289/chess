@@ -1,0 +1,20 @@
+// Place all the styles related to the Game controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here:http://sass-lang.com/
+table {
+	border-collapse: collapse;
+
+	td {
+		height: 60px;
+		width: 60px;
+		border: 1px solid black;
+		background: black;
+
+		.selected img {
+			border: 2px solid yellow;
+		}
+	}
+	tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+		background: white;
+	}
+}

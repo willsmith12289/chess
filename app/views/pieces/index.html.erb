@@ -1,0 +1,36 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Pieces</h1>
+
+<table>
+  <tbody>
+    <% 8.downto(1) do |row| %>
+      <tr class="row<%= row %>">
+      <% 1.upto(8) do |column| %>
+        <td id="<%= column %>-<%= row %>">
+          <% @pieces.each do |piece| %>
+            <% if (piece.x == column) && (piece.y == row)%>
+              <%= image_tag(piece.image) %>
+            <% end %>
+          <% end %>
+        </td>
+      <% end %>
+      </tr>
+    <% end %>
+    <% @pieces.each do |piece| %>
+        <td><%= piece.x %></td>
+        <td><%= piece.y %></td>
+        <td><%= piece.color %></td>
+        <td><%= piece.piece_type %></td>
+        <td><%= image_tag(piece.image) %></td>
+        <td><%= link_to 'Show', piece %></td>
+        <td><%= link_to 'Edit', edit_piece_path(piece) %></td>
+        <td><%= link_to 'Destroy', piece, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Piece', new_piece_path %>

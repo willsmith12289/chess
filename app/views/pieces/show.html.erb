@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>X:</strong>
+  <%= @piece.x %>
+</p>
+
+<p>
+  <strong>Y:</strong>
+  <%= @piece.y %>
+</p>
+
+<p>
+  <strong>Color:</strong>
+  <%= @piece.color %>
+</p>
+
+<p>
+  <strong>Type:</strong>
+  <%= @piece.piece_type %>
+</p>
+
+<p>
+  <strong>Image:</strong>
+  <%= @piece.image %>
+</p>
+
+<%= link_to 'Edit', edit_piece_path(@piece) %> |
+<%= link_to 'Back', pieces_path %>

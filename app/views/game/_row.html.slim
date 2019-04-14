@@ -1,0 +1,13 @@
+.board-row data-row="#{i}"
+	- ('a'..'h').each_with_index do |letter, j|
+		/ actual square number = 
+		button.square data-rank=i data-file=letter data-id="#{(i*8)+j-8}" class="#{(j%2==0) ? first : second}"
+		javascript:
+			$(function() {
+				squares.add({
+					rank: #{i},
+					file: "#{letter}",
+					id: #{(i*8)+j-8},
+					piece: null
+				})
+			})

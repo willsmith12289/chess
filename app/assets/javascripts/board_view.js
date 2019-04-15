@@ -7,7 +7,7 @@ var BoardView = Backbone.View.extend({
 	},
 
 	initialize: function () {
-		// this.listenTo(this.collection, 'update', this.setActivePiece);
+    this.activePiece = null;
     game.setBoard(this.collection);
 	},
 
@@ -22,18 +22,17 @@ var BoardView = Backbone.View.extend({
   },
 
   handleClick: function (square) {
-    // console.log(square);
     var clickedPiece = square.get('piece');
     if (clickedPiece) {
       if (this.activePiece && clickedPiece != this.activePiece) {
         console.log('attack');
+        this.activePiece.attack(this.collection, square);
+        this.activePiece = null;
       } else {
         this.activePiece = clickedPiece;
       }
     } else if (this.activePiece) {
-      this.collection.clearPiece(this.activePiece.get('space'));
-      this.activePiece.set({ space: square.location(), active: false });
-      square.set({ piece: this.activePiece });
+      this.activePiece.move(this.collection, square);
       this.activePiece = null;
     }
   }

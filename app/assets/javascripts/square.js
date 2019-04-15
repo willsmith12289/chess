@@ -7,7 +7,8 @@ var Square = Backbone.Model.extend({
 		if (this.get('piece')) {
 			this.domEl().addClass(this.get('piece').imageClass());
 		} else {
-			this.domEl().css('background-image', 'none');
+			var className = this.domEl().attr("class").split(' ').pop();
+			this.domEl().removeClass(className);
 		}
 	},
 
@@ -19,6 +20,10 @@ var Square = Backbone.Model.extend({
 		var rank = this.get('rank'),
 				file = this.get('file');
 		return $('button.square[data-rank="'+ rank +'"][data-file="'+ file +'"]');
-	}
+	},
+
+	removePiece: function (piece) {
+		this.domEl().removeClass(piece.imageClass());
+	},
 
 })

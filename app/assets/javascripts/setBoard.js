@@ -17,7 +17,7 @@ game = {
 	createPiece: function (initialSquares, type) {
 		for (color in initialSquares) {
 			_.each(initialSquares[color], function (sq) {
-				square = type === Pawn ? sq : sq[0];
+				var square = type === Pawn ? sq : sq[0];
 	  		var piece = new type({ space: square.location(), color: color });
 	  		square.set({piece: piece});
 	  	})

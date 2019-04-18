@@ -9,31 +9,14 @@ var Knight = Piece.extend({
 		}
 	},
 
-	initialize: function () {
-		this.possibleMoves = [];
-	},
-
-	attack: function (squares, square) {
-		square.removePiece(square.get('piece'));
-		this.move(squares, square);
-	},
-
-	move: function (squares, square) {
-		this.legalMoves(square);
-		if (_.find(this.possibleMoves, square.location())) {
-			Piece.prototype.move.call(this, squares, square);
-			this.possibleMoves = [];
-		}
-	},
-
-	legalMoves: function () {
-		this.possibleMoves.push({ rank: this.forward(1), file: this.right(2) });
-		this.possibleMoves.push({ rank: this.back(1), file: this.right(2) });
-		this.possibleMoves.push({ rank: this.forward(1), file: this.left(2) });
-		this.possibleMoves.push({ rank: this.back(1), file: this.left(2) });
-		this.possibleMoves.push({ rank: this.back(2), file: this.left(1) });
-		this.possibleMoves.push({ rank: this.forward(2), file: this.left(1) });
-		this.possibleMoves.push({ rank: this.back(2), file: this.right(1) });
-		this.possibleMoves.push({ rank: this.forward(2), file: this.right(1) });
+	generatelegalMoves: function () {
+		this.addMove({ rank: this.forward(1), file: this.right(2) });
+		this.addMove({ rank: this.back(1), file: this.right(2) });
+		this.addMove({ rank: this.forward(1), file: this.left(2) });
+		this.addMove({ rank: this.back(1), file: this.left(2) });
+		this.addMove({ rank: this.back(2), file: this.left(1) });
+		this.addMove({ rank: this.forward(2), file: this.left(1) });
+		this.addMove({ rank: this.back(2), file: this.right(1) });
+		this.addMove({ rank: this.forward(2), file: this.right(1) });
 	}
 })

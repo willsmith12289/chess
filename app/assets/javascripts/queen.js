@@ -9,18 +9,14 @@ var Queen = Piece.extend({
 		}
 	},
 
-	initialize: function () {
-		this.possibleMoves = [];
-	},
-
-	move: function (squares, square) {
-		this.legalMoves(square);
-		if (_.find(this.possibleMoves, square.location())) {
-			Piece.prototype.move.call(this, squares, square);
-			this.possibleMoves = [];
-		}
-	},
-
-	legalMoves: function () {
+	generatelegalMoves: function (squares) {
+		this.moveGenerator(squares, move.forward);
+		this.moveGenerator(squares, move.back);
+		this.moveGenerator(squares, move.right);
+		this.moveGenerator(squares, move.left);
+		this.moveGenerator(squares, move.forwardRight);
+		this.moveGenerator(squares, move.forwardLeft);
+		this.moveGenerator(squares, move.backRight);
+		this.moveGenerator(squares, move.backLeft);
 	}
 })

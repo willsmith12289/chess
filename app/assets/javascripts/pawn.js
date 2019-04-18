@@ -7,52 +7,33 @@ var Pawn = Piece.extend({
 			rank: [2,7],
 			file: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 		},
-		hasMoved: false
+		hasMoved: false,
 	},
 
-	initialize: function () {
-		this.possibleMoves = [];
+	attackMoves: function () {
+		this.addMove(move.forwardLeft.apply(this, [1]));
+		this.addMove(move.forwardRight.apply(this, [1]));
 	},
 
-	attack: function (squares, square) {
-		square.removePiece(square.get('piece'));
-		this.attackMoves(square);
-		this.move(squares, square);
-	},
-
-	attackMoves: function (desiredSquare) {
-		if (desiredSquare.get('piece')) {
-			this.possibleMoves.push({ rank: this.forward(1), file: this.right(1) });
-			this.possibleMoves.push({ rank: this.forward(1), file: this.left(1) });
-		}
-	},
-
-	move: function (squares, square) {
-		if (!this.get('hasMoved')) { this.firstMove(); }
-		else {
-			this.legalMove(square);
-		}
-		if (_.find(this.possibleMoves, square.location())) {
-			Piece.prototype.move.call(this, squares, square);
-			this.set({ hasMoved: true });
-			this.possibleMoves = [];
-		}
+	move: function (squares, end, start) {
+		this.set({ hasMoved: this._super('move',squares, end, start) });
+		return this.get('hasMoved');
 	},
 
 	firstMove: function () {
-		this.possibleMoves.push({
-			rank: this.forward(1),
-			file: this.get('space').file
-		});
-		this.possibleMoves.push({
-			rank: this.forward(2),
-			file: this.get('space').file
-		});
+		this.addMove(move.forward.apply(this, [1]));
+		this.addMove(move.forward.apply(this, [2]));
 	},
 
-	legalMove: function (desiredSquare) {
-		if (!desiredSquare.get('piece')) {
-			this.possibleMoves.push({ rank: this.forward(1), file: this.right(0) });
+	generatelegalMoves: function (desiredSquare) {
+		if (this.get('attacking')) { this.attackMoves(); }
+		else if (!this.get('hasMoved')) { this.firstMove(); }
+		else if (this.isNormalMove(desiredSquare)) {
+			this.addMove(move.forward.apply(this, [1]));
 		}
+	},
+
+	isNormalMove: function (desiredSquare) {
+		return !desiredSquare.get('piece') && !this.get('attacking')
 	}
 })

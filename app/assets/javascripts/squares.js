@@ -22,10 +22,5 @@ var SquareCollection = Backbone.Collection.extend({
 				});
 			})
 		}
-	},
-
-	clearPiece: function (oldPlace) {
-		var square = this.where(oldPlace)[0];
-		square.unset('piece');
 	}
 })

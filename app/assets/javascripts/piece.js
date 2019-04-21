@@ -2,6 +2,7 @@ var Piece = Backbone.Model.extend({
 	defaults: {
 		attacking: false,
 		color: null,
+		in_check: false,
 		moves: [],
 		space: {
 			rank: null,
@@ -15,8 +16,19 @@ var Piece = Backbone.Model.extend({
 	},
 
 	attack: function (allSquares, attackedSquare) {
-		this.set({ attacking: true });
-		return this.move(allSquares, attackedSquare);
+		var deadPiece = attackedSquare.get('piece');
+		if (this.get('in_check') && this.illegalCheckMove(deadPiece)) {
+		} else {
+			this.set({ attacking: true });
+			return this.move(allSquares, attackedSquare);
+		}
+	},
+
+	illegalCheckMove: function (deadPiece) {
+		if (this.get('type') != 'king' && deadPiece.get('giving_check')) {
+			return false;
+		} else if (this.get('type') === 'king') { return false; }
+		else { return true; }
 	},
 
 	imageClass: function () {
@@ -25,8 +37,16 @@ var Piece = Backbone.Model.extend({
 
 	move: function (allSquares, endSquare) {
 		this.set({ moves: [] });
-		// this.isInCheck(allSquares);
-		this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
+		if (this.get('in_check')) {
+			var deadPiece = endSquare.get('piece');
+			if (deadPiece && !this.illegalCheckMove(deadPiece)) {
+				var color = this.isBlack() ? 'black' : 'white';
+				this.collection.toggleCheck(this.collection.otherSide(color));
+				this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
+			} else { return false; }
+		} else {
+			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
+		}
 
 		if (this.isLegalMove(endSquare)) {
 	    if (this.get('attacking')) {
@@ -35,7 +55,6 @@ var Piece = Backbone.Model.extend({
 	    }
 	    this.set({ space: endSquare.location() });
 	    endSquare.set({ piece: this });
-	    this.isInCheck(allSquares);
 	    return true;
 	  } else {
 	  	this.set({ attacking: false });
@@ -78,7 +97,7 @@ var Piece = Backbone.Model.extend({
 	},
 
 	isLegalMove: function (final) {
-		return _.find(this.get('moves'), final.location())
+		return _.find(this.get('moves'), final.location());
 	},
 
 	moveArgs: function (squareCollection, endingPosition) {
@@ -99,26 +118,15 @@ var Piece = Backbone.Model.extend({
 		}
 	},
 
-	isInCheck: function (squares) {
-		var color = this.get('color');
-		this.set({ moves: [] });
-		this.get('type') === 'pawn' ?
-			this.attackMoves() : this.generatelegalMoves(squares);
-		var self = this;
-		var checked =  this.get('moves').map(function (move) {
-			return _.filter(squares.where(move), function (square) {
-				var location = square.location();
-				return _.isEqual(move,location) && square.get('piece') && square.get('piece').toJSON().type == 'king';
-			})
-		})
-		checked = checked.filter(function(x){ return !_.isEmpty(x); })
-		console.log(checked);
-		if (!_.isEmpty(checked)) { return true; } else { return false; }
-	},
-
-	otherSidesKing: function (square, color) {
-		console.log(_.result(square.toJSON(), 'piece.color', false));
-
-		return _.isEqual(_.result(square.toJSON(), 'piece.type', false), 'king') && _.isEqual(_.result(square.toJSON(), 'piece.color', false), color);
+	generatePossibleAttacks: function (squares) {
+		var model = this;
+		model.set({ moves: [] });
+		model.get('type') === 'pawn' ?
+      model.attackMoves() : model.generatelegalMoves(squares);
+    var possibleAttacks = _.flatten(model.get('moves').map(function (move) {
+    	return model.collection.filter(function (p) {
+    		return _.isEqual(p.get('space'),move) && !model.isTurn(p.get('color')); });
+    }));
+    model.set({ moves: possibleAttacks });
 	}
 })

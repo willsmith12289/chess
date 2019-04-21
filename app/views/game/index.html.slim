@@ -7,5 +7,6 @@ javascript:
 		= render 'game/row', first: first_square, second: second_square, i: i
 javascript:
 	$(function () {
-		var board = new BoardView({collection: squares});
+		var pieces = new PieceCollection();
+		var board = new BoardView({collection: squares, pieces: pieces});
 	})

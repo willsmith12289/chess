@@ -11,55 +11,108 @@ var Piece = Backbone.Model.extend({
 		type: null
 	},
 
-	addMove: function(move) {
-		this.attributes.moves.push(move);
+	initialize: function () {
+		this.msg = '';
 	},
 
 	attack: function (allSquares, attackedSquare) {
 		var deadPiece = attackedSquare.get('piece');
 		if (this.get('in_check') && this.illegalCheckMove(deadPiece)) {
+			this.msg = deadPiece.get('color') + ' is in check';
+			return false;
 		} else {
+			this.msg = '';
+			if (deadPiece.isKing()) { this.msg = this.get('color') + " wins."; }
 			this.set({ attacking: true });
 			return this.move(allSquares, attackedSquare);
 		}
 	},
 
+	attackHandler: function (endSquare) {
+		if (this.get('attacking')) {
+    	endSquare.removePiece(endSquare.get('piece'));
+    	this.set({ attacking: false });
+	  } else {
+	  	this.msg = '';
+	  }
+	},
+
 	illegalCheckMove: function (deadPiece) {
-		if (this.get('type') != 'king' && deadPiece.get('giving_check')) {
+		if ((!this.isKing() && deadPiece.get('giving_check')) || this.isKing()) {
 			return false;
-		} else if (this.get('type') === 'king') { return false; }
-		else { return true; }
+		} else {
+			this.msg = 'Illegal Move: Must move out of check.';
+			return true;
+		}
 	},
 
-	imageClass: function () {
-		return this.get('color') + '-' + this.get('type');
+	generatelegalCheckMoves: function (allSquares, endSquare) {
+		var deadPiece = endSquare.get('piece');
+		if (!this.illegalCheckMove(deadPiece)) {
+			var otherColor = this.isBlack() ? 'black' : 'white';
+			this.collection.toggleCheck(this.collection.otherSide(otherColor));
+			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
+		}
 	},
 
-	move: function (allSquares, endSquare) {
+	generateMoves: function (allSquares, endSquare) {
 		this.set({ moves: [] });
-		if (this.get('in_check')) {
-			var deadPiece = endSquare.get('piece');
-			if (deadPiece && !this.illegalCheckMove(deadPiece)) {
-				var color = this.isBlack() ? 'black' : 'white';
-				this.collection.toggleCheck(this.collection.otherSide(color));
-				this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
-			} else { return false; }
+		if (this.get('in_check') && endSquare.get('piece')) {
+			this.generatelegalCheckMoves(allSquares, endSquare)
 		} else {
 			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
 		}
+	},
 
+	doMove: function (endSquare) {
+	  this.set({ space: endSquare.location() });
+  	endSquare.set({ piece: this });
+    $('#rules').html(this.msg);
+	},
+
+	move: function (allSquares, endSquare) {
+		this.generateMoves(allSquares, endSquare);
 		if (this.isLegalMove(endSquare)) {
-	    if (this.get('attacking')) {
-	    	endSquare.removePiece(endSquare.get('piece'));
-	    	this.set({ attacking: false });
-	    }
-	    this.set({ space: endSquare.location() });
-	    endSquare.set({ piece: this });
+			this.attackHandler(endSquare);
+			this.doMove(endSquare);
 	    return true;
 	  } else {
 	  	this.set({ attacking: false });
 	  	return false;
 	  }
+	},
+
+	moveArgs: function (squareCollection, endingPosition) {
+		var type = this.get('type');
+		return (type === 'rook' || type === 'bishop' || type === 'queen') ?
+			squareCollection : endingPosition;
+	},
+
+	generatePossibleAttacks: function (squares) {
+		var model = this;
+		model.set({ moves: [] });
+		model.get('type') === 'pawn' ?
+      model.attackMoves() : model.generatelegalMoves(squares);
+    var possibleAttacks = _.flatten(model.get('moves').map(function (move) {
+    	return model.collection.filter(function (p) {
+    		var occupied = _.isEqual(p.get('space'), move);
+    		return occupied && !model.isTurn(p.get('color'));
+    	});
+    }));
+    model.set({ moves: possibleAttacks });
+	},
+
+	/**************************************************
+	* Working general methods.
+	* Shouldn't need to tinker.
+	**************************************************/
+
+	isKing: function () {
+		return this.get('type') === 'king';
+	},
+
+	addMove: function(move) {
+		this.attributes.moves.push(move);
 	},
 
 	forward: function (i) {
@@ -84,10 +137,6 @@ var Piece = Backbone.Model.extend({
 		return String.fromCharCode(newFilesCharCode);
 	},
 
-	filesCharCode: function () {
-		return this.get('space').file.charCodeAt(0);
-	},
-
 	isBlack: function () {
 		return this.get('color') === 'black';
 	},
@@ -100,10 +149,12 @@ var Piece = Backbone.Model.extend({
 		return _.find(this.get('moves'), final.location());
 	},
 
-	moveArgs: function (squareCollection, endingPosition) {
-		var type = this.get('type');
-		return (type === 'rook' || type === 'bishop' || type === 'queen') ?
-			squareCollection : endingPosition;
+	filesCharCode: function () {
+		return this.get('space').file.charCodeAt(0);
+	},
+
+	imageClass: function () {
+		return this.get('color') + '-' + this.get('type');
 	},
 
 	moveGenerator: function (squares, direction) {
@@ -117,16 +168,4 @@ var Piece = Backbone.Model.extend({
 			i++;
 		}
 	},
-
-	generatePossibleAttacks: function (squares) {
-		var model = this;
-		model.set({ moves: [] });
-		model.get('type') === 'pawn' ?
-      model.attackMoves() : model.generatelegalMoves(squares);
-    var possibleAttacks = _.flatten(model.get('moves').map(function (move) {
-    	return model.collection.filter(function (p) {
-    		return _.isEqual(p.get('space'),move) && !model.isTurn(p.get('color')); });
-    }));
-    model.set({ moves: possibleAttacks });
-	}
 })

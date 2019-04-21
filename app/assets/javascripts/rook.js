@@ -2,6 +2,7 @@
 
 var Rook = Piece.extend({
 	defaults: {
+		has_moved: false,
 		type: 'rook',
 		space: {
 			rank: [1, 8],

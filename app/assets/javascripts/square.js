@@ -24,6 +24,5 @@ var Square = Backbone.Model.extend({
 
 	removePiece: function (piece) {
 		this.domEl().removeClass(piece.imageClass());
-	},
-
+	}
 })

@@ -18,20 +18,12 @@ var BoardView = Backbone.View.extend({
   	game.setBoard(this.collection);
   },
 
-  changeTurn: function () {
-    if (this.startingSquare) { this.startingSquare.unset('piece'); }
-    this.piece = null;
-    this.startingSquare = null;
-    this.turn = this.turn === 'black' ? 'white' : 'black';
-  },
-
   clickHandler: function (square) {
     var clickedPiece = square.get('piece'),
         view = this;
 
     if (clickedPiece) { view.pieceWasClicked(square); }
     else if (view.isMoving(clickedPiece)) {
-      var oldSpace = view.collection.where(this.piece.get('space'))[0];
       if (view.piece.move(view.collection, square)) {
         if (view.isInCheck(view.collection)) {
           view.piece.set({ giving_check: true });
@@ -42,28 +34,12 @@ var BoardView = Backbone.View.extend({
     }
   },
 
-  findClickedSquare: function (e) {
-  	var id = e.target.dataset.id;
-		var square = this.collection.get(id);
-    if (square) { this.clickHandler(square); }
-  },
-
-  isAttacking: function (clickedPiece) {
-    return this.piece && !clickedPiece.isTurn(this.turn)
-  },
-
   isInCheck: function (squares) {
     this.piece.generatePossibleAttacks(squares);
-    return _.some(this.piece.get('moves'),
+    var inCheck = _.some(this.piece.get('moves'),
       function (deadPiece) { return deadPiece.get('type') === 'king'; });
-  },
-
-  isMoving: function (containsPiece) {
-    return this.piece && !containsPiece
-  },
-
-  nextTurn: function () {
-    return this.turn === 'black' ? 'white' : 'black';
+    if (inCheck) { $('#rules').html(this.nextTurn() + ' is in check'); }
+    return inCheck;
   },
 
   pieceWasClicked: function (square) {
@@ -74,5 +50,36 @@ var BoardView = Backbone.View.extend({
       this.startingSquare = square;
       this.piece = clickedPiece;
     }
-  }
+  },
+
+  /**************************************************
+  * Working general methods.
+  * Shouldn't need to tinker.
+  **************************************************/
+
+  changeTurn: function () {
+    if (this.startingSquare) { this.startingSquare.unset('piece'); }
+    this.piece = null;
+    this.startingSquare = null;
+    this.turn = this.turn === 'black' ? 'white' : 'black';
+    $('#player').html(this.turn + "'s turn");
+  },
+
+  findClickedSquare: function (e) {
+    var id = e.target.dataset.id;
+    var square = this.collection.get(id);
+    if (square) { this.clickHandler(square); }
+  },
+
+  isAttacking: function (clickedPiece) {
+    return this.piece && !clickedPiece.isTurn(this.turn)
+  },
+
+  isMoving: function (containsPiece) {
+    return this.piece && !containsPiece
+  },
+
+  nextTurn: function () {
+    return this.turn === 'black' ? 'white' : 'black';
+  },
 });

@@ -2,6 +2,7 @@
 
 var King = Piece.extend({
 	defaults: {
+		has_moved: false,
 		type: 'king',
 		space: {
 			rank: [1, 8],

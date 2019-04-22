@@ -17,7 +17,7 @@ var King = Piece.extend({
 	canCastle: function (desiredSquare) {
 		this.moveGenerator(desiredSquare.collection, move.right, true);
 		this.moveGenerator(desiredSquare.collection, move.left, true);
-		var canMove = _.any(this.get('moves'), function (move) {
+		var canMove = _.some(this.get('moves'), function (move) {
 			return _.isEqual(move, desiredSquare.location());
 		});
 		return !this.get('has_moved') && canMove;
@@ -45,7 +45,8 @@ var King = Piece.extend({
 			self.addMove(rightMove);
 			var rightRookSpace = { rank: self.forward(0), file: self.right(3) };
 			this.rook = this.findRooks().filter(function (r) {
-				return _.isEqual(r.get('space'), rightRookSpace); })[0];
+				return _.isEqual(r.get('space'), rightRookSpace);
+			})[0];
 		}
 	},
 
@@ -56,14 +57,12 @@ var King = Piece.extend({
 			self.addMove(leftMove);
 			var leftRookSpace = { rank: self.forward(0), file: self.left(4) };
 			this.rook = this.findRooks().filter(function (r) {
-				return _.isEqual(r.get('space'), leftRookSpace); })[0];
+				return _.isEqual(r.get('space'), leftRookSpace);
+			})[0];
 		}
 	},
 
 	moveDirection: function (desiredSquare) {
-		var rightMove = { rank: this.forward(0), file: this.right(2) },
-				leftMove = { rank: this.forward(0), file: this.left(2) },
-				self = this;
 		this.kingSide(desiredSquare);
 		this.queenSide(desiredSquare);
 		if (this.rook) {

@@ -1,7 +1,7 @@
 var PieceCollection = Backbone.Collection.extend({
 	model: Piece,
 
-	otherSide: function (turn) {
+	player: function (turn) {
 		return new this.constructor(this.where({ color : turn }));
 	},
 

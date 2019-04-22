@@ -1,4 +1,5 @@
-var Piece = Backbone.Model.extend({
+//= require ./piece_master
+var Piece = PieceMaster.extend({
 	defaults: {
 		attacking: false,
 		color: null,
@@ -17,7 +18,7 @@ var Piece = Backbone.Model.extend({
 
 	attack: function (allSquares, attackedSquare) {
 		var deadPiece = attackedSquare.get('piece');
-		if (this.get('in_check') && this.illegalCheckMove(deadPiece)) {
+		if (this.get('in_check') && !this.legalCheckMove(deadPiece)) {
 			this.msg = deadPiece.get('color') + ' is in check';
 			return false;
 		} else {
@@ -28,29 +29,19 @@ var Piece = Backbone.Model.extend({
 		}
 	},
 
-	attackHandler: function (endSquare) {
-		if (this.get('attacking')) {
-    	endSquare.removePiece(endSquare.get('piece'));
-    	this.set({ attacking: false });
-	  } else {
-	  	this.msg = '';
-	  }
-	},
-
-	illegalCheckMove: function (deadPiece) {
+	legalCheckMove: function (deadPiece) {
 		if ((!this.isKing() && deadPiece.get('giving_check')) || this.isKing()) {
-			return false;
+			return true;
 		} else {
 			this.msg = 'Illegal Move: Must move out of check.';
-			return true;
+			return false;
 		}
 	},
 
 	generatelegalCheckMoves: function (allSquares, endSquare) {
 		var deadPiece = endSquare.get('piece');
-		if (!this.illegalCheckMove(deadPiece)) {
-			var otherColor = this.isBlack() ? 'black' : 'white';
-			this.collection.toggleCheck(this.collection.otherSide(otherColor));
+		if (this.legalCheckMove(deadPiece)) {
+			this.collection.toggleCheck(this.collection.player(this.get('color')));
 			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
 		}
 	},
@@ -59,50 +50,45 @@ var Piece = Backbone.Model.extend({
 		this.set({ moves: [] });
 		if (this.get('in_check') && endSquare.get('piece')) {
 			this.generatelegalCheckMoves(allSquares, endSquare)
-		} else if (this.isKing()) {
-			this.generatelegalMoves(endSquare);
 		} else if (!this.get('in_check')) {
 			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
 		}
 	},
 
 	doMove: function (endSquare) {
-	  this.set({ space: endSquare.location() });
-  	endSquare.set({ piece: this });
+		this.get('attacking') ?
+    	endSquare.removePiece(endSquare.get('piece')) : this.msg = '';
     $('#rules').html(this.msg);
-    this.set({ has_moved: true });
+    this.set({
+    	attacking: false,
+    	has_moved: true,
+    	space: endSquare.location()
+    });
+    endSquare.set({ piece: this });
+    return true;
 	},
 
 	move: function (allSquares, endSquare) {
 		this.generateMoves(allSquares, endSquare);
-		if (this.isLegalMove(endSquare)) {
-			this.attackHandler(endSquare);
-			this.doMove(endSquare);
-	    return true;
-	  } else {
-	  	this.set({ attacking: false });
-	  	return false;
+		return this.isLegalMove(endSquare) ? this.doMove(endSquare) : false;
 	  }
 	},
 
 	moveArgs: function (squareCollection, endingPosition) {
 		var type = this.get('type');
+		// figure out why i needed this.isKing()
 		if ((type === 'rook' || type === 'bishop' || type === 'queen')) {
-			if (this.isCastling()) { return endingPosition; }
-			else { return squareCollection; }
+			return (this.isCastling() || this.isKing()) ?
+				endingPosition : squareCollection;
 		} else { return endingPosition; }
 	},
 
 	generatePossibleAttacks: function (squares, square) {
 		this.set({ moves: [] });
 		if (!this.isCastling()) {
-			if (this.get('type') === 'pawn') {
-	      this.attackMoves();
-			} else if (this.isKing()) {
-				this.generatelegalMoves(square);
-			} else {
+			(this.get('type') === 'pawn') ?
+				this.attackMoves() :
 				this.generatelegalMoves(this.moveArgs(squares, square));
-			}
 		}
 		this.setPossibleAttacks();
 	},
@@ -117,75 +103,5 @@ var Piece = Backbone.Model.extend({
     	});
     }));
     model.set({ moves: possibleAttacks });
-	},
-
-	/**************************************************
-	* Working general methods.
-	* Shouldn't need to tinker.
-	**************************************************/
-
-	isKing: function () {
-		return this.get('type') === 'king';
-	},
-
-	addMove: function(move) {
-		this.attributes.moves.push(move);
-	},
-
-	forward: function (i) {
-		return this.isBlack() ?
-			this.get('space').rank-i : this.get('space').rank+i;
-	},
-
-	back: function (i) {
-		return this.isBlack() ?
-			this.get('space').rank+i : this.get('space').rank-i;
-	},
-
-	right: function (i) {
-		return String.fromCharCode(this.filesCharCode()+i);
-	},
-
-	left: function (i) {
-		return String.fromCharCode(this.filesCharCode()-i);
-	},
-
-	isBlack: function () {
-		return this.get('color') === 'black';
-	},
-
-	isCastling: function () {
-		var castling = this.get('castling');
-		return castling === true && castling != undefined;
-	},
-
-	isTurn: function (color) {
-		return this.isCastling() || (color === this.get('color'));
-	},
-
-	isLegalMove: function (final) {
-		return _.some(this.get('moves'), final.location());
-	},
-
-	filesCharCode: function () {
-		return this.get('space').file.charCodeAt(0);
-	},
-
-	imageClass: function () {
-		return this.get('color') + '-' + this.get('type');
-	},
-
-	moveGenerator: function (squares, direction, king) {
-		king = king || false;
-		var i = 1,
-				countTo = king ? 3 : 9;
-				square = new Square();
-
-		while(i < countTo && square && !square.get('piece')) {
-			var dir = direction.apply(this, [i]);
-			this.addMove(dir);
-			var square = squares.where(dir)[0];
-			i++;
-		}
-	},
+	}
 })

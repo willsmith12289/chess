@@ -9,6 +9,5 @@ javascript:
 		= render 'game/row', first: first_square, second: second_square, i: i
 javascript:
 	$(function () {
-		var pieces = new PieceCollection();
-		var board = new BoardView({collection: squares, pieces: pieces});
+		var board = new BoardView({collection: squares});
 	})

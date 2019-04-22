@@ -59,7 +59,9 @@ var Piece = Backbone.Model.extend({
 		this.set({ moves: [] });
 		if (this.get('in_check') && endSquare.get('piece')) {
 			this.generatelegalCheckMoves(allSquares, endSquare)
-		} else {
+		} else if (this.isKing()) {
+			this.generatelegalMoves(endSquare);
+		} else if (!this.get('in_check')) {
 			this.generatelegalMoves(this.moveArgs(allSquares, endSquare));
 		}
 	},
@@ -68,6 +70,7 @@ var Piece = Backbone.Model.extend({
 	  this.set({ space: endSquare.location() });
   	endSquare.set({ piece: this });
     $('#rules').html(this.msg);
+    this.set({ has_moved: true });
 	},
 
 	move: function (allSquares, endSquare) {
@@ -84,15 +87,29 @@ var Piece = Backbone.Model.extend({
 
 	moveArgs: function (squareCollection, endingPosition) {
 		var type = this.get('type');
-		return (type === 'rook' || type === 'bishop' || type === 'queen') ?
-			squareCollection : endingPosition;
+		if ((type === 'rook' || type === 'bishop' || type === 'queen')) {
+			if (this.isCastling()) { return endingPosition; }
+			else { return squareCollection; }
+		} else { return endingPosition; }
 	},
 
-	generatePossibleAttacks: function (squares) {
+	generatePossibleAttacks: function (squares, square) {
+		this.set({ moves: [] });
+		if (!this.isCastling()) {
+			if (this.get('type') === 'pawn') {
+	      this.attackMoves();
+			} else if (this.isKing()) {
+				this.generatelegalMoves(square);
+			} else {
+				this.generatelegalMoves(this.moveArgs(squares, square));
+			}
+		}
+		this.setPossibleAttacks();
+	},
+
+	setPossibleAttacks: function () {
 		var model = this;
-		model.set({ moves: [] });
-		model.get('type') === 'pawn' ?
-      model.attackMoves() : model.generatelegalMoves(squares);
+
     var possibleAttacks = _.flatten(model.get('moves').map(function (move) {
     	return model.collection.filter(function (p) {
     		var occupied = _.isEqual(p.get('space'), move);
@@ -126,27 +143,28 @@ var Piece = Backbone.Model.extend({
 	},
 
 	right: function (i) {
-		var newFilesCharCode = this.isBlack() ?
-			this.filesCharCode()-i : this.filesCharCode()+i;
-		return String.fromCharCode(newFilesCharCode);
+		return String.fromCharCode(this.filesCharCode()+i);
 	},
 
 	left: function (i) {
-		var newFilesCharCode = this.isBlack() ?
-			this.filesCharCode()+i : this.filesCharCode()-i;
-		return String.fromCharCode(newFilesCharCode);
+		return String.fromCharCode(this.filesCharCode()-i);
 	},
 
 	isBlack: function () {
 		return this.get('color') === 'black';
 	},
 
+	isCastling: function () {
+		var castling = this.get('castling');
+		return castling === true && castling != undefined;
+	},
+
 	isTurn: function (color) {
-		return color === this.get('color');
+		return this.isCastling() || (color === this.get('color'));
 	},
 
 	isLegalMove: function (final) {
-		return _.find(this.get('moves'), final.location());
+		return _.some(this.get('moves'), final.location());
 	},
 
 	filesCharCode: function () {
@@ -157,11 +175,13 @@ var Piece = Backbone.Model.extend({
 		return this.get('color') + '-' + this.get('type');
 	},
 
-	moveGenerator: function (squares, direction) {
+	moveGenerator: function (squares, direction, king) {
+		king = king || false;
 		var i = 1,
+				countTo = king ? 3 : 9;
 				square = new Square();
 
-		while(i < 9 && square && !square.get('piece')) {
+		while(i < countTo && square && !square.get('piece')) {
 			var dir = direction.apply(this, [i]);
 			this.addMove(dir);
 			var square = squares.where(dir)[0];

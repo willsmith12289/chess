@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  color: 1
+  moves: 
+  rank: 1
+  file: MyString
+  type: 1
+  has_moved: false
+
+two:
+  color: 1
+  moves: 
+  rank: 1
+  file: MyString
+  type: 1
+  has_moved: false

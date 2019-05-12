@@ -1,26 +1,6 @@
 // Place all the styles related to the Game controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here:http://sass-lang.com/
-table {
-	border-collapse: collapse;
-
-	td {
-		height: 60px;
-		width: 60px;
-		border: 1px solid black;
-		background: white;
-
-		.selected img {
-			border: 2px solid yellow;
-		}
-
-	}
-
-	tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
-		background: black;
-	}
-
-}
 
 body {
 	font: 14px "Century Gothic", Futura, sans-serif;
@@ -47,13 +27,13 @@ ol, ul {
 	float: left;
 	font-size: 24px;
 	font-weight: bold;
-	line-height: 34px;
-	height: 34px;
+	line-height: 75px;
+	height: 75px;
 	margin-right: -1px;
 	margin-top: -1px;
 	padding: 0;
 	text-align: center;
-	width: 34px;
+	width: 75px;
 }
 
 .square:focus {
@@ -67,6 +47,7 @@ ol, ul {
 }
 
 .game-info {
+	font-size: 24px;
 	margin-left: 20px;
 }
 
@@ -76,4 +57,9 @@ ol, ul {
 
 .black {
 	background: black;
+}
+
+#rules, #player {
+	font-size: 24px;
+	font-weight: bold;
 }

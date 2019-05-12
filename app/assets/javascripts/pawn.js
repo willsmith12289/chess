@@ -7,7 +7,7 @@ var Pawn = Piece.extend({
 			rank: [2,7],
 			file: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 		},
-		hasMoved: false,
+		has_moved: false,
 	},
 
 	attackMoves: function () {
@@ -16,8 +16,8 @@ var Pawn = Piece.extend({
 	},
 
 	move: function (squares, end, start) {
-		this.set({ hasMoved: this._super('move',squares, end, start) });
-		return this.get('hasMoved');
+		this.set({ has_moved: this._super('move',squares, end, start) });
+		return this.get('has_moved');
 	},
 
 	firstMove: function () {
@@ -27,7 +27,7 @@ var Pawn = Piece.extend({
 
 	generatelegalMoves: function (desiredSquare) {
 		if (this.get('attacking')) { this.attackMoves(); }
-		else if (!this.get('hasMoved')) { this.firstMove(); }
+		else if (!this.get('has_moved')) { this.firstMove(); }
 		else if (this.isNormalMove(desiredSquare)) {
 			this.addMove(move.forward.apply(this, [1]));
 		}

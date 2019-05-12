@@ -71,7 +71,6 @@ var Piece = PieceMaster.extend({
 	move: function (allSquares, endSquare) {
 		this.generateMoves(allSquares, endSquare);
 		return this.isLegalMove(endSquare) ? this.doMove(endSquare) : false;
-	  }
 	},
 
 	moveArgs: function (squareCollection, endingPosition) {

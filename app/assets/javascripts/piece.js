@@ -24,7 +24,7 @@ var Piece = PieceMaster.extend({
 		} else {
 			this.msg = '';
 			if (deadPiece.isKing()) { this.msg = this.get('color') + " wins."; }
-			this.set({ attacking: true });
+			this.save({ attacking: true });
 			return this.move(allSquares, attackedSquare);
 		}
 	},
@@ -57,9 +57,9 @@ var Piece = PieceMaster.extend({
 
 	doMove: function (endSquare) {
 		this.get('attacking') ?
-    	endSquare.removePiece(endSquare.get('piece')) : this.msg = '';
+    	endSquare.killPiece(endSquare.get('piece')) : this.msg = '';
     $('#rules').html(this.msg);
-    this.set({
+    this.save({
     	attacking: false,
     	has_moved: true,
     	space: endSquare.location()
@@ -74,7 +74,7 @@ var Piece = PieceMaster.extend({
 	},
 
 	moveArgs: function (squareCollection, endingPosition) {
-		var type = this.get('type');
+		var type = this.type();
 		// figure out why i needed this.isKing()
 		if ((type === 'rook' || type === 'bishop' || type === 'queen')) {
 			return (this.isCastling() || this.isKing()) ?
@@ -85,7 +85,7 @@ var Piece = PieceMaster.extend({
 	generatePossibleAttacks: function (squares, square) {
 		this.set({ moves: [] });
 		if (!this.isCastling()) {
-			(this.get('type') === 'pawn') ?
+			(this.type() === 'pawn') ?
 				this.attackMoves() :
 				this.generatelegalMoves(this.moveArgs(squares, square));
 		}

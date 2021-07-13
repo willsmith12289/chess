@@ -2,7 +2,7 @@
 
 var Knight = Piece.extend({
 	defaults: {
-		type: 'knight',
+		type: 2,
 		space: {
 			rank: [1, 8],
 			file: ['b', 'g']

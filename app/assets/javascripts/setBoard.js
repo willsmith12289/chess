@@ -1,4 +1,4 @@
-game = {
+var game = {
 	setBoard: function (squares, pieces) {
 		var types = [Pawn, Bishop, Rook, Knight, King, Queen];
 		_.each(types, function (type) {
@@ -11,8 +11,10 @@ game = {
 		for (color in initialSquares) {
 			_.each(initialSquares[color], function (sq) {
 				var square = type === Pawn ? sq : sq[0];
+				console.log(color);
 	  		var piece = new type({ space: square.location(), color: color });
 	  		square.set({piece: piece});
+	  		piece.save();
 	  		pieceType.push(piece);
 	  	});
 		}

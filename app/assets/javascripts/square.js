@@ -22,7 +22,8 @@ var Square = Backbone.Model.extend({
 		return $('button.square[data-rank="'+ rank +'"][data-file="'+ file +'"]');
 	},
 
-	removePiece: function (piece) {
+	killPiece: function (piece) {
 		this.domEl().removeClass(piece.imageClass());
+		piece.destroy();
 	}
 })

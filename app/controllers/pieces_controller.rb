@@ -15,28 +15,7 @@ class PiecesController < ApplicationController
 
   private
     def piece_params
-      params[:type] = get_type if params[:type].present?
-      params[:color] = params[:color] == 'black' ? 1 : 0
-      # params[:has_moved] = params[:hasMoved]
+      params[:color] = params[:color] == 'black' ? true : false
       params.require(:piece).permit(:color, :moves, :has_moved, :type, space: [:rank, :file])
-    end
-
-    def get_type
-      case params[:type]
-      when 'bishop'
-        0
-      when 'king'
-        1
-      when 'knight'
-        2
-      when 'pawn'
-        3
-      when 'queen'
-        4
-      when 'rook'
-        5
-      else
-        nil
-      end
     end
 end

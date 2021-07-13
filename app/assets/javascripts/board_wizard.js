@@ -34,7 +34,7 @@ var BoardWizard = Backbone.View.extend({
   },
 
   isAttacking: function (clickedPiece) {
-    return this.piece && clickedPiece.isTurn(this.turn);
+    return this.piece && !clickedPiece.isTurn(this.turn);
   },
 
   isMoving: function (containsPiece) {

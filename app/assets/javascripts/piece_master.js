@@ -1,38 +1,25 @@
 var PieceMaster = Backbone.Model.extend({
 	urlRoot: '/pieces',
 
-	// parse: function (data) {
-	// 	data.color = data.color ? 'black' : 'white';
-	// 	data.type = this.find_type(data.type);
-	// 	return data;
-	// },
+	parse: function (data) {
+		data.color = data.color ? 'black' : 'white';
+		return data;
+	},
 
-	// find_type: function (type) {
-	// 	switch (type) {
-	// 		case 0:
-	// 			return 'bishop';
-	// 			break;
-	// 		case 1:
-	// 			return 'king';
-	// 			break;
-	// 		case 2:
-	// 			return 'knight';
-	// 			break;
-	// 		case 3:
-	// 			return 'pawn';
-	// 			break;
-	// 		case 4:
-	// 			return 'queen';
-	// 			break;
-	// 		case 5:
-	// 			return 'rook';
-	// 			break;
-	// 		default: null
-	// 	}
-	// },
+	type: function () {
+		const typeEnum = {
+			0: 'bishop',
+	    1: 'king',
+	    2: 'knight',
+	    3: 'pawn',
+	    4: 'queen',
+	    5: 'rook'
+		};
+		return typeEnum[this.get('type')];
+	},
 
 	isKing: function () {
-		return this.get('type') === 'king';
+		return this.type() === 'king';
 	},
 
 	addMove: function(move) {
@@ -67,7 +54,7 @@ var PieceMaster = Backbone.Model.extend({
 	},
 
 	isTurn: function (color) {
-		return this.isCastling() || _.isMatch(color,this.get('color'));
+		return this.isCastling() || _.isEqual(color,this.get('color'));
 	},
 
   nextTurn: function () {
@@ -83,7 +70,8 @@ var PieceMaster = Backbone.Model.extend({
 	},
 
 	imageClass: function () {
-		return this.get('color') + '-' + this.get('type');
+		console.log(this.type());
+		return this.get('color') + '-' + this.type();
 	},
 
 	moveGenerator: function (squares, direction, king) {

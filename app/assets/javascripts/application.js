@@ -20,3 +20,5 @@
 Backbone.Model.prototype._super = function(funcName){
   return this.constructor.__super__[funcName].apply(this, _.rest(arguments));
 }
+
+// const type = { bishop: 0, king: 1, knight: 2, pawn: 3, queen: 4, rook: 5 };

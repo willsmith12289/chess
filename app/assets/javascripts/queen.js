@@ -2,7 +2,7 @@
 
 var Queen = Piece.extend({
 	defaults: {
-		type: 'queen',
+		type: 4,
 		space: {
 			rank: [1, 8],
 			file: ['d']

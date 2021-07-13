@@ -3,7 +3,7 @@
 var King = Piece.extend({
 	defaults: {
 		has_moved: false,
-		type: 'king',
+		type: 1,
 		space: {
 			rank: [1, 8],
 			file: ['e']
@@ -72,6 +72,6 @@ var King = Piece.extend({
 	},
 
 	findRooks: function () {
-		return this.collection.where({ type: 'rook', color: this.get('color') });
+		return this.collection.where({ type: 5, color: this.get('color') });
 	}
 })

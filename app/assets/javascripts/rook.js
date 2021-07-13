@@ -4,7 +4,7 @@ var Rook = Piece.extend({
 	defaults: {
 		castling: false,
 		has_moved: false,
-		type: 'rook',
+		type: 5,
 		space: {
 			rank: [1, 8],
 			file: ['a', 'h']

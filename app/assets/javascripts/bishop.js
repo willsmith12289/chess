@@ -2,7 +2,7 @@
 
 var Bishop = Piece.extend({
 	defaults: {
-		type: 'bishop',
+		type: 0,
 		space: {
 			rank: [1, 8],
 			file: ['c', 'f']
